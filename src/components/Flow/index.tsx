@@ -1,0 +1,115 @@
+import { use, useCallback } from 'react';
+import ReactFlow, {
+  Node,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  Connection,
+  Edge,
+  ConnectionLineType,
+  Panel,
+} from 'reactflow';
+import CustomNode from './CustomNode';
+
+import styles from './Flow.module.css';
+
+const initialNodes: Node[] = [
+  {
+    id: '1',
+    type: 'input',
+    data: { label: 'Node 1' },
+    position: { x: 250, y: 5 },
+  },
+  {
+    id: '2',
+    data: { label: 'Node 2' },
+    position: { x: 100, y: 100 },
+  },
+  {
+    id: '3',
+    data: { label: 'Node 3' },
+    position: { x: 400, y: 100 },
+  },
+  {
+    id: '4',
+    data: { label: 'Node 4' },
+    position: { x: 400, y: 200 },
+    type: 'custom',
+    className: styles.customNode,
+  },
+];
+
+const initialEdges: Edge[] = [
+  { id: 'e1-2', source: '1', target: '2' },
+  { id: 'e1-3', source: '1', target: '3' },
+];
+
+const nodeTypes = {
+  custom: CustomNode,
+};
+
+const defaultEdgeOptions = {
+  animated: true,
+  type: 'smoothstep',
+};
+
+function Flow() {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const onConnect = useCallback(
+    (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
+
+  /* Add node and prompt the name dialog */
+  const handleAddNode =  useCallback(() => {
+    const label = prompt('Enter the name of the node');
+    if (!label) {
+      return;
+    }
+    const newNode: Node = {
+      id: Date.now().toString(),
+      data: { label },
+      position: { x: 100, y: 100 },
+    };
+    setNodes((nodes) => nodes.concat(newNode));
+  }, [setNodes]);
+
+  /* JSON EXPORT with Download*/
+  const handleExportFlowJSON = useCallback(() => {
+    const flow = { nodes, edges };
+    const json = JSON.stringify(flow, null, 2);
+    console.log(json);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'flow.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [nodes, edges]);
+    
+
+  return (
+    <div className={styles.flow}>
+      <ReactFlow
+        nodes={nodes}
+        onNodesChange={onNodesChange}
+        edges={edges}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        nodeTypes={nodeTypes}
+        defaultEdgeOptions={defaultEdgeOptions}
+        connectionLineType={ConnectionLineType.SmoothStep}
+        fitView
+      >
+      <Panel position="top-right">
+        <button onClick={handleAddNode}>Add Node</button>
+        <button onClick={handleExportFlowJSON}>Export Flow JSON</button>
+      </Panel>
+      </ReactFlow>
+    </div>
+  );
+}
+
+export default Flow;
