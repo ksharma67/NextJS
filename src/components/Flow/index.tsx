@@ -88,6 +88,34 @@ function Flow() {
     a.click();
     URL.revokeObjectURL(url);
   }, [nodes, edges]);
+
+  /* Api call for run all the blocks one by one and makes an API call to the Flask server and displays the result from the server */
+    const handleRunFlow = useCallback(async () => {
+      // Implement the logic to run the flow
+      // Exexute them one by one by using the ids of the nodes
+      for (const node of nodes) {
+        // Make an API call to the Flask server(https://flask-hajqdlxaba-uc.a.run.app/)
+        if (!node.data.label) {
+          return;
+        }
+        // POST API Call for each node
+        const response = await fetch('https://flask-hajqdlxaba-uc.a.run.app/api', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ label: node.data.label }),
+        });
+        if (!response.ok) {
+          throw new Error(`API call failed: ${response.status}`);
+        }
+        try {
+          console.error(Error);
+        } catch (error: any) {
+          console.error(error);
+        }
+      }
+    }, []);
     
 
   return (
@@ -106,6 +134,7 @@ function Flow() {
       <Panel position="top-right">
         <button onClick={handleAddNode}>Add Node</button>
         <button onClick={handleExportFlowJSON}>Export Flow JSON</button>
+        <button onClick={handleRunFlow}>Run Flow</button>
       </Panel>
       </ReactFlow>
     </div>
