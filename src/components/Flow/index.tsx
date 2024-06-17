@@ -90,32 +90,32 @@ function Flow() {
   }, [nodes, edges]);
 
   /* Api call for run all the blocks one by one and makes an API call to the Flask server and displays the result from the server */
-    const handleRunFlow = useCallback(async () => {
-      // Implement the logic to run the flow
-      // Exexute them one by one by using the ids of the nodes
-      for (const node of nodes) {
-        // Make an API call to the Flask server(https://flask-hajqdlxaba-uc.a.run.app/)
-        if (!node.data.label) {
-          return;
-        }
-        // POST API Call for each node
-        const response = await fetch('https://flask-hajqdlxaba-uc.a.run.app/api', {
+  const handleRunFlow = useCallback(async () => {
+    for (const node of nodes) {
+      if (!node.data.label) {
+        continue;
+      }
+
+      try {
+        const response = await fetch('http://localhost:8080/api', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ label: node.data.label }),
         });
+
         if (!response.ok) {
           throw new Error(`API call failed: ${response.status}`);
         }
-        try {
-          console.error(Error);
-        } catch (error: any) {
-          console.error(error);
-        }
+
+        const result = await response.json();
+        console.log(`Result for node ${node.id}:`, result);
+      } catch (error) {
+        console.error(`Error for node ${node.id}:`, error);
       }
-    }, []);
+    }
+  }, [nodes]);
     
 
   return (
