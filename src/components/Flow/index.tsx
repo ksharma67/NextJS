@@ -97,7 +97,7 @@ function Flow() {
       }
 
       try {
-        const response = await fetch('http://localhost:8080/api', {
+        const response = await fetch('https://flask-hajqdlxaba-uc.a.run.app/api', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
